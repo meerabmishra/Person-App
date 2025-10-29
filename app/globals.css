@@ -1,0 +1,11 @@
+html, body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  margin: 0;
+  padding: 0;
+  background: #f9f9fb;
+  color: #111;
+}
+
+main { max-width: 900px; margin: 0 auto; }
+
+a { color: #0366d6; text-decoration: none }
