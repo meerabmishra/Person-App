@@ -1,22 +1,47 @@
 import mongoose, { Schema, model, models } from 'mongoose'
 
-const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL || 'mongodb://localhost:27017/person-app'
+const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL
 
 if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable')
 }
 
-/**
- * Avoid creating multiple connections in development when using HMR
- */
-let cached: { conn: typeof mongoose | null } = (global as any)._mongooseCache || { conn: null }
+interface Cached {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+}
+
+let cached: Cached = { conn: null, promise: null }
 
 async function connect() {
-  if (cached.conn) return cached.conn
-  const conn = await mongoose.connect(MONGODB_URI)
-  cached.conn = conn
-  ;(global as any)._mongooseCache = cached
-  return conn
+  if (cached.conn) {
+    return cached.conn
+  }
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+      maxPoolSize: 1,
+      minPoolSize: 0,
+      maxIdleTimeMS: 10000,
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 20000,
+    }
+
+    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
+      mongoose.set('strictQuery', true)
+      return mongoose
+    })
+  }
+
+  try {
+    cached.conn = await cached.promise
+  } catch (e) {
+    cached.promise = null
+    throw e
+  }
+
+  return cached.conn
 }
 
 const UserSchema = new Schema({
@@ -35,7 +60,18 @@ const PersonSchema = new Schema({
   createdAt: { type: Date, default: Date.now }
 })
 
-const User = models.User || model('User', UserSchema)
-const Person = models.Person || model('Person', PersonSchema)
+let User: any
+try {
+  User = models.User || model('User', UserSchema)
+} catch {
+  User = model('User', UserSchema)
+}
+
+let Person: any
+try {
+  Person = models.Person || model('Person', PersonSchema)
+} catch {
+  Person = model('Person', PersonSchema)
+}
 
 export { connect, User, Person }
