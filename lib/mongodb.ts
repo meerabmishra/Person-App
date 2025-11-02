@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, models } from 'mongoose'
+import mongoose, { Schema, model, models, connect as _connect } from 'mongoose'
 
 const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL
 
@@ -28,7 +28,7 @@ async function connect() {
       socketTimeoutMS: 20000,
     }
 
-    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
+    cached.promise = _connect(MONGODB_URI!, opts).then((mongoose) => {
       mongoose.set('strictQuery', true)
       return mongoose
     })
