@@ -19,15 +19,54 @@ export default async function PersonsPage() {
   const persons = user ? await Person.find({ ownerId: user._id }).lean().exec() : []
 
   return (
-    <div>
-      <h2>People</h2>
-      <p>Signed in as {session.user?.email} — <a href="/api/auth/signout">Sign out</a></p>
-      <Link href="/persons/new">Add person</Link>
-      <ul>
+    <div style={{ padding: '50px', backgroundColor: '#f9f9f9', color: '#333' }}>
+      <h1 style={{ fontSize: '2.5rem', marginBottom: '20px', color: '#0077b6' }}>People</h1>
+      <p style={{ marginBottom: '20px' }}>
+        Signed in as <strong>{session.user?.email}</strong> — <a href="/api/auth/signout" style={{ color: '#0077b6' }}>Sign out</a>
+      </p>
+      <Link href="/persons/new" style={{
+        display: 'inline-block',
+        padding: '10px 20px',
+        backgroundColor: '#0077b6',
+        color: '#fff',
+        textDecoration: 'none',
+        borderRadius: '4px',
+        marginBottom: '30px'
+      }}>Add New Person</Link>
+      <div style={{ 
+        display: 'grid', 
+        gap: '20px',
+        maxWidth: '800px',
+        margin: '0 auto'
+      }}>
         {persons.map((p: any) => (
-          <li key={p._id}>{p.name} — <Link href={`/persons/${p._id}/edit`}>Edit</Link></li>
+          <div key={p._id} style={{
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '8px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <div>
+              <h3 style={{ margin: '0 0 5px 0', color: '#333' }}>{p.name}</h3>
+              <div style={{ color: '#666', fontSize: '0.9rem' }}>
+                {p.email && <div>Email: {p.email}</div>}
+                {p.phone && <div>Phone: {p.phone}</div>}
+              </div>
+            </div>
+            <Link href={`/persons/${p._id}/edit`} style={{
+              padding: '8px 16px',
+              backgroundColor: '#e9ecef',
+              color: '#495057',
+              textDecoration: 'none',
+              borderRadius: '4px',
+              fontSize: '0.9rem'
+            }}>Edit</Link>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   )
 }

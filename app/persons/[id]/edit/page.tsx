@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 export default function EditPersonPage({ params }: { params: { id: string } }) {
   const { id } = params;
   const router = useRouter();
-  const [person, setPerson] = useState({ name: '', email: '' });
+  const [person, setPerson] = useState({ name: '', email: '', phone: '' });
 
   useEffect(() => {
     // Fetch the person data when the component loads
@@ -67,6 +67,17 @@ export default function EditPersonPage({ params }: { params: { id: string } }) {
             name="email"
             value={person.email}
             onChange={handleInputChange}
+            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+          />
+        </div>
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '5px' }}>Phone Number</label>
+          <input
+            type="tel"
+            name="phone"
+            value={person.phone}
+            onChange={handleInputChange}
+            placeholder="+1 (123) 456-7890"
             style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
           />
         </div>
