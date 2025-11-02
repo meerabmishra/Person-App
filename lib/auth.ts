@@ -4,6 +4,11 @@ import { connect, User } from './mongodb'
 
 export const runtime = 'edge'
 
+// Get the deployment URL for auth configuration
+const deploymentUrl = process.env.VERCEL_URL 
+  ? `https://${process.env.VERCEL_URL}`
+  : process.env.AUTH_URL || 'http://localhost:3000'
+
 const { handlers, auth } = NextAuth({
   providers: [
     Google({
@@ -11,12 +16,23 @@ const { handlers, auth } = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
       authorization: {
         params: {
-          prompt: "select_account", // Forces Google to always show the account selector
+          prompt: "select_account",
           access_type: "online"
         }
       }
     })
   ],
+  cookies: {
+    pkceCodeVerifier: {
+      name: 'next-auth.pkce.code_verifier',
+      options: {
+        httpOnly: true,
+        sameSite: 'none',
+        path: '/',
+        secure: true
+      }
+    }
+  },
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",

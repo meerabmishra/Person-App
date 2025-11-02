@@ -1,9 +1,9 @@
 import mongoose, { Schema, model, models } from 'mongoose'
 
-const MONGODB_URI = process.env.DATABASE_URL || 'mongodb://localhost:27017/person-app'
+const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL || 'mongodb://localhost:27017/person-app'
 
 if (!MONGODB_URI) {
-  throw new Error('Please define the DATABASE_URL environment variable inside .env.local')
+  throw new Error('Please define the MONGODB_URI environment variable')
 }
 
 /**
