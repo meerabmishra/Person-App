@@ -1,47 +1,30 @@
-import mongoose, { Schema, model, models, connect as _connect } from 'mongoose'
+import mongoose from 'mongoose'
+import { Schema } from 'mongoose'
 
-const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL
+const MONGODB_URI = process.env.MONGODB_URI
 
 if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable')
 }
 
-interface Cached {
-  conn: typeof mongoose | null;
-  promise: Promise<typeof mongoose> | null;
-}
-
-let cached: Cached = { conn: null, promise: null }
+let isConnected = false
 
 async function connect() {
-  if (cached.conn) {
-    return cached.conn
-  }
-
-  if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
-      maxPoolSize: 1,
-      minPoolSize: 0,
-      maxIdleTimeMS: 10000,
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 20000,
-    }
-
-    cached.promise = _connect(MONGODB_URI!, opts).then((mongoose) => {
-      mongoose.set('strictQuery', true)
-      return mongoose
-    })
+  if (isConnected) {
+    return mongoose
   }
 
   try {
-    cached.conn = await cached.promise
-  } catch (e) {
-    cached.promise = null
-    throw e
+    await mongoose.connect(MONGODB_URI, {
+      bufferCommands: false,
+    })
+    
+    isConnected = true
+    return mongoose
+  } catch (error) {
+    console.error('MongoDB connection error:', error)
+    throw error
   }
-
-  return cached.conn
 }
 
 const UserSchema = new Schema({
@@ -62,16 +45,16 @@ const PersonSchema = new Schema({
 
 let User: any
 try {
-  User = models.User || model('User', UserSchema)
+  User = mongoose.models.User || mongoose.model('User', UserSchema)
 } catch {
-  User = model('User', UserSchema)
+  User = mongoose.model('User', UserSchema)
 }
 
 let Person: any
 try {
-  Person = models.Person || model('Person', PersonSchema)
+  Person = mongoose.models.Person || mongoose.model('Person', PersonSchema)
 } catch {
-  Person = model('Person', PersonSchema)
+  Person = mongoose.model('Person', PersonSchema)
 }
 
 export { connect, User, Person }

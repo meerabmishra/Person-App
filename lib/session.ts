@@ -17,8 +17,10 @@ function deriveOrigin(req?: Request) {
       }
     }
 
+    // For local development, always use localhost
+    if (process.env.NODE_ENV === 'development') return 'http://localhost:3000'
+    // For production, use NEXTAUTH_URL
     if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL.replace(/\/$/, '')
-    if (process.env.NEXT_PUBLIC_VERCEL_URL) return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
     const port = process.env.PORT || '3000'
     return `http://localhost:${port}`
   } catch (e) {

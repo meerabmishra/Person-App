@@ -12,7 +12,7 @@ type PersonDoc = {
   createdAt: Date
 }
 
-export const runtime = 'edge'
+// Remove edge runtime for now
 export const dynamic = 'force-dynamic'
 
 export default async function PersonsPage() {
@@ -28,7 +28,7 @@ export default async function PersonsPage() {
 
   const userEmail = session.user?.email
   try {
-    await connect()
+    const mongoose = await connect()
     const user = await User.findOne({ email: userEmail }).exec()
     if (!user) {
       return (
