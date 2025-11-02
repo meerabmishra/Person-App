@@ -2,6 +2,16 @@ import { getSessionServerComponent } from '../../lib/session'
 import Link from 'next/link'
 import { connect, User, Person } from '../../lib/mongodb'
 
+interface PersonDoc {
+  _id: string
+  name: string
+  email?: string
+  phone?: string
+  notes?: string
+  ownerId: string
+  createdAt: Date
+}
+
 export const dynamic = 'force-dynamic'
 
 export default async function PersonsPage() {
@@ -19,7 +29,6 @@ export default async function PersonsPage() {
   try {
     await connect()
     const user = await User.findOne({ email: userEmail }).exec()
-    const persons = user ? await Person.find({ ownerId: user._id }).lean().exec() : []
     if (!user) {
       return (
         <div>
@@ -28,6 +37,8 @@ export default async function PersonsPage() {
         </div>
       )
     }
+    
+    const persons = (await Person.find({ ownerId: user._id }).lean().exec()) as PersonDoc[]
     return (
       <div style={{ padding: '50px', backgroundColor: '#f9f9f9', color: '#333' }}>
         <h1 style={{ fontSize: '2.5rem', marginBottom: '20px', color: '#0077b6' }}>People</h1>
@@ -49,7 +60,7 @@ export default async function PersonsPage() {
           maxWidth: '800px',
           margin: '0 auto'
         }}>
-          {persons.map((p: any) => (
+          {persons.map((p: PersonDoc) => (
             <div key={p._id} style={{
               backgroundColor: 'white',
               padding: '20px',
